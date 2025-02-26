@@ -1,0 +1,9 @@
+sudo ovs-vsctl -- --id=@sflow create sflow agent=eth0 target=\"127.0.0.1:6343\" sampling=64 polling=10 -- -- set bridge s1 sflow=@sflow
+sudo ovs-vsctl -- --id=@sflow create sflow  agent=s1-eth1 target=\"127.0.0.1:6343\" sampling=64 polling=10 -- -- set bridge s1 sflow=@sflow
+sudo docker run --rm -p 8008:8008 -p 6343:6343/udp sflow/sflow-rt
+sudo mn --custom topo2.py --topo topo2 --controller=remote --mac --switch ovsk,protocols=OpenFlow13 --link tc
+
+sudo ovs-vsctl -- --id=@sflow create sflow agent=10.1.20.99 target=\"10.1.20.10:6343\" sampling=64 polling=10 -- -- set bridge br0 sflow=@sflow2e7cf0c2-946a-497d-992f-fe638279a704
+sudo ovs-vsctl list sflow
+
+sipp -s 1001 -r 1000 -p 5060 172.27.223.100 -sf ddos_inv.xml
