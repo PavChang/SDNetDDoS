@@ -6,7 +6,7 @@ sFlow_RT = 'http://10.1.20.10:8008'
 floodlight = 'http://10.1.20.10:8080'
 defense = {'icmp': True, 'syn': False, 'dns_amplifier': False, 'udp': True}
 black_list_icmp = []
-block_time = 120
+block_time = 1200
 fw_priority = '32767'
 groups = {'external': ['0.0.0.0/0'], 'internal': ['0.0.0.0/0']} # value = 'bytes' # set to 'bytes' and multiply 8 to get bits/second
 # define ICMP flood attack attributes #
@@ -64,7 +64,7 @@ while True:
                                 else:
                                     continue
                     break
-    
+
     if defense['udp']:
         r = requests.put(sFlow_RT + '/flow/' + sip_invite_metric_name + '/json',data=json.dumps(sip_invite_flows))
         r = requests.put(sFlow_RT + '/threshold/' + sip_invite_metric_name + '/json',data=json.dumps(sip_invite_threshold))
@@ -90,8 +90,9 @@ while True:
                                 if topKey['value'] > sip_invite_threshold_value:
                                     key = topKey['key'] 
                                     parts = key.split(',')
-                                    message = {'switch':targetedSwitch,'name': 'SIP_block_'+str(parts[5]), "cookie":"0","priority": fw_priority,'ipv4_src': str(parts[5]),'ipv4_dst': str(parts[6]), "active":"true","eth_type":"0x0800", } # pas d'action = drop
+                                    message = {'switch':targetedSwitch,'name': 'SIP_block_'+str(parts[5]), "cookie":"0","priority": fw_priority,'ipv4_src': str(parts[5])+'/24','ipv4_dst': str(parts[6])+'/24', "active":"true","eth_type":"0x0800", } # pas d'action = drop
                                     print(message)
+                                    print("========================")
                                     push_data = json.dumps(message) 
                                     r = requests.post(floodlight + '/wm/staticflowpusher/json', data=push_data)
                                     black_list_sip.append([time.time()+block_time, push_data])
